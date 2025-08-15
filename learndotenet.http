@@ -1,0 +1,6 @@
+@learndotenet_HostAddress = http://localhost:5062
+
+GET {{learndotenet_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
