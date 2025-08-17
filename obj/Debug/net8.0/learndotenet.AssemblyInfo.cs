@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("learndotenet")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+314bdb572163beb8a78a8c7e8bef6f284ee2f32b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1366bac79277fd207247ebd658805379a2af0537")]
 [assembly: System.Reflection.AssemblyProductAttribute("learndotenet")]
 [assembly: System.Reflection.AssemblyTitleAttribute("learndotenet")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
