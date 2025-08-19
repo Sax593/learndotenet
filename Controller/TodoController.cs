@@ -1,74 +1,94 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TodoApp.Data;
+using TodoApp.Model;
 
-[ApiController]
-[Route("api/[controller]")]
-public class TodoController : ControllerBase
+namespace TodoApp.Controllers
 {
-    private static List<Todo> todos = new List<Todo>
+    [ApiController]
+    [Route("api/[controller]")]
+    public class TodoController : ControllerBase
     {
-        new Todo { Id = 1, Title = "Apprendre .NET", IsDone = false },
-        new Todo { Id = 2, Title = "Création d'un CRUD", IsDone = false }
-    };
+        private readonly AppDbContext _context;
 
-    [HttpGet]
-    public ActionResult<IEnumerable<Todo>> GetTodos()
-    {
-        return Ok(todos);
-    }
-
-    [HttpGet("{id}")]
-    public ActionResult<Todo> GetTodoById(int id)
-    {
-        var todo = todos.FirstOrDefault(t => t.Id == id);
-        if (todo == null)
+        public TodoController(AppDbContext context)
         {
-            return NotFound();
-        }
-        return Ok(todo);
-    }
-
-    [HttpPost]
-    public ActionResult<Todo> CreateTodo([FromBody] Todo newTodo)
-    {
-        if (newTodo == null || string.IsNullOrWhiteSpace(newTodo.Title))
-        {
-            return BadRequest("Le titre ne peut pas être vide.");
+            _context = context;
         }
 
-        newTodo.Id = todos.Max(t => t.Id) + 1;
-        todos.Add(newTodo);
-        return CreatedAtAction(nameof(GetTodoById), new { id = newTodo.Id }, newTodo);
-    }
-
-    [HttpPut("{id}")]
-    public ActionResult UpdateTodo(int id, [FromBody] Todo updatedTodo)
-    {
-        if (updatedTodo == null || string.IsNullOrWhiteSpace(updatedTodo.Title))
+        // GET: api/todo
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Todo>>> GetTodos()
         {
-            return BadRequest("Le titre ne peut pas être vide.");
+            return await _context.Todos.ToListAsync();
         }
 
-        var todo = todos.FirstOrDefault(t => t.Id == id);
-        if (todo == null)
+        // GET: api/todo/1
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Todo>> GetTodoById(int id)
         {
-            return NotFound();
+            var todo = await _context.Todos.FindAsync(id);
+
+            if (todo == null)
+            {
+                return NotFound();
+            }
+
+            return todo;
         }
 
-        todo.Title = updatedTodo.Title;
-        todo.IsDone = updatedTodo.IsDone;
-        return NoContent();
-    }
-
-    [HttpDelete("{id}")]
-    public ActionResult DeleteTodo(int id)
-    {
-        var todo = todos.FirstOrDefault(t => t.Id == id);
-        if (todo == null)
+        // POST: api/todo
+        [HttpPost]
+        public async Task<ActionResult<Todo>> CreateTodo([FromBody] Todo newTodo)
         {
-            return NotFound();
+            if (newTodo == null || string.IsNullOrWhiteSpace(newTodo.Title))
+            {
+                return BadRequest("Le titre ne peut pas être vide.");
+            }
+
+            _context.Todos.Add(newTodo);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetTodoById), new { id = newTodo.Id }, newTodo);
         }
 
-        todos.Remove(todo);
-        return NoContent();
+        // PUT: api/todo/1
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTodo(int id, [FromBody] Todo updatedTodo)
+        {
+            if (updatedTodo == null || string.IsNullOrWhiteSpace(updatedTodo.Title))
+            {
+                return BadRequest("Le titre ne peut pas être vide.");
+            }
+
+            var todo = await _context.Todos.FindAsync(id);
+            if (todo == null)
+            {
+                return NotFound();
+            }
+
+            todo.Title = updatedTodo.Title;
+            todo.IsDone = updatedTodo.IsDone;
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        // DELETE: api/todo/1
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTodo(int id)
+        {
+            var todo = await _context.Todos.FindAsync(id);
+            if (todo == null)
+            {
+                return NotFound();
+            }
+
+            _context.Todos.Remove(todo);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
